@@ -408,6 +408,7 @@ export class App {
     if (!this.map) return;
     this.countryIntelModal = new CountryIntelModal();
     this.countryIntelModal.setShareStoryHandler((code, name) => {
+      this.countryIntelModal?.hide();
       this.openCountryStory(code, name);
     });
 
