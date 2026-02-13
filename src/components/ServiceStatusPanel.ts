@@ -1,5 +1,6 @@
 import { Panel } from './Panel';
 import { escapeHtml } from '@/utils/sanitize';
+import { isDesktopRuntime } from '@/services/runtime';
 
 interface ServiceStatus {
   id: string;
@@ -7,6 +8,13 @@ interface ServiceStatus {
   category: string;
   status: 'operational' | 'degraded' | 'outage' | 'unknown';
   description: string;
+}
+
+interface LocalBackendStatus {
+  enabled?: boolean;
+  mode?: string;
+  port?: number;
+  remoteBase?: string;
 }
 
 interface ServiceStatusResponse {
@@ -19,6 +27,7 @@ interface ServiceStatusResponse {
     unknown: number;
   };
   services: ServiceStatus[];
+  local?: LocalBackendStatus;
 }
 
 type CategoryFilter = 'all' | 'cloud' | 'dev' | 'comm' | 'ai' | 'saas';
@@ -38,6 +47,7 @@ export class ServiceStatusPanel extends Panel {
   private error: string | null = null;
   private filter: CategoryFilter = 'all';
   private refreshInterval: ReturnType<typeof setInterval> | null = null;
+  private localBackend: LocalBackendStatus | null = null;
 
   constructor() {
     super({ id: 'service-status', title: 'Service Status', showCount: false });
@@ -61,6 +71,7 @@ export class ServiceStatusPanel extends Panel {
       if (!data.success) throw new Error('Failed to load status');
 
       this.services = data.services;
+      this.localBackend = data.local ?? null;
       this.error = null;
     } catch (err) {
       this.error = err instanceof Error ? err.message : 'Failed to fetch';
@@ -110,11 +121,13 @@ export class ServiceStatusPanel extends Panel {
     const filtered = this.getFilteredServices();
     const issues = filtered.filter(s => s.status !== 'operational');
 
+    const backendHtml = this.renderBackendStatus();
     const summaryHtml = this.renderSummary(filtered);
     const filtersHtml = this.renderFilters();
     const servicesHtml = this.renderServices(filtered);
 
     this.content.innerHTML = `
+      ${backendHtml}
       ${summaryHtml}
       ${filtersHtml}
       <div class="service-status-list">
@@ -124,6 +137,28 @@ export class ServiceStatusPanel extends Panel {
     `;
 
     this.attachFilterListeners();
+  }
+
+
+  private renderBackendStatus(): string {
+    if (!isDesktopRuntime()) return '';
+
+    if (!this.localBackend?.enabled) {
+      return `
+        <div class="service-status-backend warning">
+          Desktop local backend unavailable. Falling back to cloud API.
+        </div>
+      `;
+    }
+
+    const port = this.localBackend.port ?? 46123;
+    const remote = this.localBackend.remoteBase ?? 'https://worldmonitor.app';
+
+    return `
+      <div class="service-status-backend">
+        Local backend active on <strong>127.0.0.1:${port}</strong> · cloud fallback: <strong>${escapeHtml(remote)}</strong>
+      </div>
+    `;
   }
 
   private renderSummary(services: ServiceStatus[]): string {
