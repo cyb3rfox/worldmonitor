@@ -1,0 +1,47 @@
+services:
+  worldmonitor:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # Choose variant: "full" (worldmonitor.app) or "tech" (startups.worldmonitor.app)
+        VITE_VARIANT: full
+    ports:
+      - "3000:3000"
+    environment:
+      # ── Site variant (must match build arg) ──
+      VITE_VARIANT: full
+
+      # ── AI Summarization ──
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+
+      # ── Redis Cache (Upstash) ──
+      UPSTASH_REDIS_REST_URL: ${UPSTASH_REDIS_REST_URL:-}
+      UPSTASH_REDIS_REST_TOKEN: ${UPSTASH_REDIS_REST_TOKEN:-}
+
+      # ── Market Data ──
+      FINNHUB_API_KEY: ${FINNHUB_API_KEY:-}
+
+      # ── Energy Data ──
+      EIA_API_KEY: ${EIA_API_KEY:-}
+
+      # ── Economic Data ──
+      FRED_API_KEY: ${FRED_API_KEY:-}
+
+      # ── Aircraft Tracking ──
+      WINGBITS_API_KEY: ${WINGBITS_API_KEY:-}
+
+      # ── Conflict Data ──
+      ACLED_ACCESS_TOKEN: ${ACLED_ACCESS_TOKEN:-}
+
+      # ── Internet Outages ──
+      CLOUDFLARE_API_TOKEN: ${CLOUDFLARE_API_TOKEN:-}
+
+      # ── Satellite Fires ──
+      NASA_FIRMS_API_KEY: ${NASA_FIRMS_API_KEY:-}
+
+      # ── AIS/OpenSky Relay ──
+      WS_RELAY_URL: ${WS_RELAY_URL:-}
+      VITE_WS_RELAY_URL: ${VITE_WS_RELAY_URL:-}
+    restart: unless-stopped

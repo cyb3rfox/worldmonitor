@@ -1,0 +1,15 @@
+node_modules
+dist
+.git
+.env
+.env.local
+*.md
+e2e
+tests
+docs
+src-tauri
+playwright.config.ts
+playwright-report
+test-results
+*.png
+*.jpg
