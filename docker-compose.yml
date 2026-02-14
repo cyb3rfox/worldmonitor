@@ -8,6 +8,8 @@ services:
         VITE_VARIANT: full
     expose:
       - '3000'
+    labels:
+      - traefik.http.middlewares.authentik-auth@file
     environment:
       # ── Site variant (must match build arg) ──
       VITE_VARIANT: full
