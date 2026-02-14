@@ -6,8 +6,8 @@ services:
       args:
         # Choose variant: "full" (worldmonitor.app) or "tech" (startups.worldmonitor.app)
         VITE_VARIANT: full
-    ports:
-      - "3000:3000"
+    expose:
+      - '3000'
     environment:
       # ── Site variant (must match build arg) ──
       VITE_VARIANT: full
